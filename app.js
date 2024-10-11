@@ -5,7 +5,7 @@ const app = express();
 const port = 3000;
 
 // 데이터베이스 연결
-const connection  = require('../BE/mysql');
+const connection  = require('./database/connect/mysql');
 
 // 라우터 불러오기
 const userRoutes = require('./routes/userAdvertiser');
