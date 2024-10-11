@@ -1,16 +1,25 @@
 const express = require('express');
 const axios = require('axios');
+
 const app = express();
+require("dotenv").config()
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET =  process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_LOGIN_REDIRECT_URI =  process.env.GOOGLE_LOGIN_REDIRECT_URI;
+const GOOGLE_SIGNUP_REDIRECT_URI =  process.env.GOOGLE_SIGNUP_REDIRECT_URI;
+const GOOGLE_USERINFO_URL =  process.env.GOOGLE_USERINFO_URL;
+const GOOGLE_TOKEN_URL =  process.env.GOOGLE_TOKEN_URL;
 
-const GOOGLE_CLIENT_ID = "180023724524-krnbi57k3r2u3r2adnj9kb9at8cbaacq.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "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";
-const GOOGLE_LOGIN_REDIRECT_URI = 'http://localhost:3000/login/redirect';
-const GOOGLE_SIGNUP_REDIRECT_URI = 'http://localhost:3000/signup/redirect';
-const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
-const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
-const GOOGLE_ANANLYTICS_URL = 'https://youtubeanalytics.googleapis.com/v2/reports';
 
-const connection  = require('./database/connect/mysql');
+const mysql = require('mysql2');
+
+// MySQL 연결 설정
+const connection = mysql.createConnection({
+    host: 'localhost',       // MySQL 서버 주소
+    user: 'root',            // MySQL 사용자
+    password: '1102', // MySQL 비밀번호
+    database: 'mydb'  // 사용할 데이터베이스 이름
+});
 
 connection.connect((err) => {
     if (err) {
@@ -56,7 +65,7 @@ app.get('/login/redirect', async (req, res) => {
     console.log(`code: ${code}`);
 
     try {
-        // Google access 토큰을 받기 위한 코드
+        // Google OAuth 토큰 요청
         const tokenResponse = await axios.post(GOOGLE_TOKEN_URL, {
             code,
             client_id: GOOGLE_CLIENT_ID,
@@ -67,17 +76,17 @@ app.get('/login/redirect', async (req, res) => {
 
         const accessToken = tokenResponse.data.access_token;
 
-        // access_token, refresh_token 등의 구글 토큰 정보 가져오기
+        //구글 사용자 정보 가져오기
         const userInfoResponse = await axios.get(GOOGLE_USERINFO_URL, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
         });
-        
+
         const { email } = userInfoResponse.data;
 
         // MySQL에서 해당 이메일 확인
-        connection.query('SELECT * FROM mydb.influencer_user WHERE email = ?', [email], (err, results) => {
+        connection.query('SELECT * FROM mydb.mydb.user_influencer WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('DB 조회 오류:', err);
                 return res.status(500).send('DB 조회 중 오류 발생');
@@ -94,7 +103,6 @@ app.get('/login/redirect', async (req, res) => {
             }
         });
 
-    
     } catch (error) {
         console.error('Error during login:', error.message);
         res.status(500).json({ error: '로그인 처리 중 오류 발생' });
@@ -124,16 +132,11 @@ app.get('/signup/redirect', async (req, res) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         });
-
-
-        console.log('YouTube Analytics 데이터:', analyticsResponse.data);
-        res.json(analyticsResponse.data);
-
         // 구글에서 가져온 사용자 정보를 변수 안에 넣기
         const { email, id: googleId } = userInfoResponse.data;
 
         // MySQL에서 이미 가입된 이메일인지 확인
-        connection.query('SELECT * FROM mydb.influencer_user WHERE email = ?', [email], (err, results) => {
+        connection.query('SELECT * FROM mydb.user_influencer WHERE email = ?', [email], (err, results) => {
             if (err) {
                 console.error('DB 조회 오류:', err);
                 return res.status(500).send('DB 조회 중 오류 발생');
@@ -163,16 +166,13 @@ app.get('/signup/redirect', async (req, res) => {
             }
         });
 
-    }catch (error) {
-        if (error.response) {
-            console.error('YouTube Analytics API Error:', error.response.status, error.response.data);
-            res.status(error.response.status).json(error.response.data);
-        } else {
-            console.error('Error:', error.message);
-            res.status(500).json({ error: 'Failed to fetch YouTube Analytics data' });
-        }
+    } catch (error) {
+        console.error('Error during signup:', error.message);
+        res.status(500).json({ error: '회원가입 처리 중 오류 발생' });
     }
 });
+
+
 
 app.listen(3000, () => {
     console.log('server is running at 3000');
