@@ -1,8 +1,8 @@
+require("dotenv").config();
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
-require("dotenv").config()
-
+// app.use(express.json());
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET =  process.env.GOOGLE_CLIENT_SECRET;
@@ -10,7 +10,7 @@ const GOOGLE_LOGIN_REDIRECT_URI =  process.env.GOOGLE_LOGIN_REDIRECT_URI;
 const GOOGLE_SIGNUP_REDIRECT_URI =  process.env.GOOGLE_SIGNUP_REDIRECT_URI;
 const GOOGLE_USERINFO_URL =  process.env.GOOGLE_USERINFO_URL;
 const GOOGLE_TOKEN_URL =  process.env.GOOGLE_TOKEN_URL;
-
+// GOOGLE_ANALYTICS_URL=https://youtubeanalytics.googleapis.com/v2/reports
 const connection  = require('../database/connect/mysql');
 
 
@@ -32,6 +32,7 @@ router.get('/login', (req, res) => {
     url += '&response_type=code'
     url += '&scope=email profile'    
     res.redirect(url);
+    console.log(url);
 });
 
 // 구글 로그인 화면을 가져오기 위한 url    
@@ -46,8 +47,9 @@ router.get('/signup', (req, res) => {
 
 
 router.get('/login/redirect', async (req, res) => {
-    const { code } = req.query;
-    console.log(`code: ${code}`);
+    // const { code } = req.query;
+    const code = req.query.code;// POST 요청의 body에서 code를 가져옴
+    console.log(`Authorization Code: ${code}`);
 
     try {
         // Google OAuth 토큰 요청
@@ -57,9 +59,11 @@ router.get('/login/redirect', async (req, res) => {
             client_secret: GOOGLE_CLIENT_SECRET,
             redirect_uri: GOOGLE_LOGIN_REDIRECT_URI,
             grant_type: 'authorization_code',
-        });
 
+        });
+        
         const accessToken = tokenResponse.data.access_token;
+        console.log(`Access Token: ${accessToken}`);
 
         //구글 사용자 정보 가져오기
         const userInfoResponse = await axios.get(GOOGLE_USERINFO_URL, {
@@ -80,6 +84,7 @@ router.get('/login/redirect', async (req, res) => {
             if (results.length > 0) {
                 // 로그인 성공
                 console.log('로그인 성공:', email);
+                //window.location.href = 'inf_home.html'; // 홈 화면으로 이동
                 return res.send('<h1>로그인 성공!</h1>');
             } else {
                 // 회원정보가 없을 경우
@@ -94,9 +99,9 @@ router.get('/login/redirect', async (req, res) => {
     }
 });
 
-
+// 회원가입
 router.get('/signup/redirect', async (req, res) => {
-    const { code } = req.query;
+    const code = req.query.code;
     console.log(`code: ${code}`);
 
     try {
@@ -118,7 +123,7 @@ router.get('/signup/redirect', async (req, res) => {
             },
         });
         // 구글에서 가져온 사용자 정보를 변수 안에 넣기
-        const { email, id: googleId } = userInfoResponse.data;
+        const { email, id: influencer_id, name} = userInfoResponse.data;
 
         // MySQL에서 이미 가입된 이메일인지 확인
         connection.query('SELECT * FROM mydb.user_influencer WHERE email = ?', [email], (err, results) => {
@@ -136,16 +141,14 @@ router.get('/signup/redirect', async (req, res) => {
                 `);
             } else {
                 // 새 사용자 등록
-                connection.query(
-                    'INSERT INTO  mydb.user_influencer (email, google_id, created_at) VALUES (?, ?, ?)',
-                    [email, googleId, new Date()],
+                connection.query('INSERT INTO mydb.user_influencer (influencer_id, email, name) VALUES (?, ?, ?)',
+                    [influencer_id, email, name],
                     (err, result) => {
                         if (err) {
                             console.error('DB 저장 오류:', err);
                             return res.status(500).send('회원가입 중 오류 발생');
                         }
                         console.log('새 사용자 등록 성공:', email);
-                        res.redirect('/dashboard');  // 회원가입 후 대시보드로 이동
                     }
                 );
             }
@@ -156,6 +159,5 @@ router.get('/signup/redirect', async (req, res) => {
         res.status(500).json({ error: '회원가입 처리 중 오류 발생' });
     }
 });
-
 
 module.exports = router;

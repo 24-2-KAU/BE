@@ -1,10 +1,11 @@
 const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
-  host: 'localhost',       // MySQL 서버 주소
-  user: 'root',            // MySQL 사용자
-  password: '1102', // MySQL 비밀번호
-  database: 'mydb'  // 사용할 데이터베이스 이름
+  host: 'database-1.crksao0eifvg.ap-southeast-2.rds.amazonaws.com',       // MySQL 서버 주소
+  user: 'admin',            // MySQL 사용자
+  password: 'ektjtakfn', // MySQL 비밀번호
+  database: 'mydb',
+  port : 3306,  // 사용할 데이터베이스 이름
 });
 
 
