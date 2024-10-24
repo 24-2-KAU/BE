@@ -24,6 +24,7 @@ app.use(express.json());
 // 라우터 불러오기
 const userRoutes = require('./routes/userAdvertiser');
 const oauthRoutes = require('./routes/ouath');
+const productRoutes = require('./routes/products');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,6 +32,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // 라우터 사용
 app.use(userRoutes);
 app.use(oauthRoutes);
+app.use(productRoutes);
 
 // 서버 실행
 app.listen(port, () => {

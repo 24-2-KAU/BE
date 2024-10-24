@@ -62,7 +62,7 @@ router.post('/api/users/login', async (req, res) => {
       }
     } else {
       // 해당 이메일이 DB에 없는 경우
-      console.log('회원 정보가 없습니다:', ad_id);
+      console.log('회원 정보가 없습니다:', ad_id); 
       return res.status(404).json({ message: 'User not found' });
     }
   } catch (err) {
