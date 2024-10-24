@@ -41,11 +41,11 @@ router.post("/api/users/signup", async (req, res) => {
 
 // 로그인
 router.post('/api/users/login', async (req, res) => {
-  const {email,password} = req.body;
-  console.log('Received login request:', { email, password });
+  const {ad_id,password} = req.body;
+  console.log('Received login request:', { ad_id, password });
   try {
     // 데이터베이스에서 사용자 조회 (Promise 방식)
-    const [results] = await connection.promise().query('SELECT * FROM mydb.user_advertiser WHERE email = ?', [email]);
+    const [results] = await connection.promise().query('SELECT * FROM mydb.user_advertiser WHERE ad_id = ?', [ad_id]);
 
     if (results.length > 0) {
       const user = results[0]; // 조회된 사용자 정보
@@ -53,16 +53,16 @@ router.post('/api/users/login', async (req, res) => {
       // 입력된 비밀번호와 DB의 비밀번호 비교
       if (user.password === password) {
         // 로그인 성공
-        console.log('로그인 성공:', email);
+        console.log('로그인 성공:', ad_id);
         return res.status(200).json({ message: 'Login success!' });
       } else {
         // 비밀번호가 일치하지 않는 경우
-        console.log('비밀번호 불일치:', email);
+        console.log('비밀번호 불일치:', ad_id);
         return res.status(401).json({ message: 'Incorrect password' });
       }
     } else {
       // 해당 이메일이 DB에 없는 경우
-      console.log('회원 정보가 없습니다:', email);
+      console.log('회원 정보가 없습니다:', ad_id);
       return res.status(404).json({ message: 'User not found' });
     }
   } catch (err) {
