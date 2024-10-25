@@ -7,10 +7,13 @@ const cors = require('cors');  // CORS 모듈 로드
 const session = require('express-session'); // express-session 추가
 // 데이터베이스 연결
 const connection  = require('./database/connect/mysql');
+//const authenticateToken = require('./middleware/autenticationToken'); // 미들웨어 가져오기
+
 const corsOptions = {
   origin: 'http://127.0.0.1:5500', // 프론트엔드 도메인
-  optionsSuccessStatus: 200
-}
+  optionsSuccessStatus: 200,
+  credentials: true 
+};
 app.use(cors(corsOptions));
 
 app.use(session({
@@ -19,6 +22,7 @@ app.use(session({
   saveUninitialized: true,   // 초기화되지 않은 세션을 저장할지 여부
   cookie: { secure: false }  // HTTPS 환경에서는 true로 설정
 }));
+
 app.use(express.json());
 
 // 라우터 불러오기

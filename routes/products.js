@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'secret_key'; // Same secret used for signing the token
+const authenticateToken = require('../middleware/autenticationToken'); // Import JWT middleware
 
 // 데이터 베이스 연결파일
 const connection  = require('../database/connect/mysql');
@@ -11,10 +14,10 @@ router.post('/api/products',async(req, res) => {
   const product_id = Math.floor(Math.random() * 1000); // Generates a random number between 0 and 999,999,999
   console.log('Generated product_id:', product_id);
   console.log('Received product request:', req.body); // 요청 로그 출력
-
+  const processedProductPic = product_pic && Object.keys(product_pic).length > 0 ? product_pic : null;
   // 데이터 베이스 저장
-  connection.query('INSERT INTO  mydb.products (product_id, product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [product_id, product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hastag],
+  connection.query('INSERT INTO  mydb.products (product_id, product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag,ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)',
+    [product_id, product_name, product_price, budget, processedProductPic, viewer_age, viewer_gender, platform, hastag],
     (err,result) => {
       if(err){
         console.error('상품등록 실패: ',err);
@@ -26,6 +29,37 @@ router.post('/api/products',async(req, res) => {
     }
   )
 })
+
+// // 상품 등록 api
+// router.post('/api/products',async (req, res) => {
+//   const { product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag } = req.body;
+//   const product_id = Math.floor(Math.random() * 1000000); // Generates a random product_id
+
+
+//   if (!ad_id) {
+//     return res.status(401).json({ message: 'Unauthorized: Advertiser ID missing' });
+//   }
+
+  
+//   const processedProductPic = product_pic && Object.keys(product_pic).length > 0 ? product_pic : null;
+//   console.log('Generated product_id:', product_id);
+//   console.log('Received product request:', req.body);
+  
+//   // 데이터베이스에 저장
+//   connection.query(
+//     'INSERT INTO mydb.products (product_id, product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag,ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)',
+//     [product_id, product_name, product_price, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag],
+//     (err, result) => {
+//       if (err) {
+//         console.error('상품등록 실패:', err);
+//         return res.status(500).json({ message: 'Failed to register product' });
+//       }
+//       console.log('상품등록 성공:', product_name);
+//       return res.status(201).json({ message: 'Product registered successfully' });
+//     }
+//   );
+// });
+
 
 // 상품 목록 조회 api
 router.get('/api/products/check', async (req, res) => {
@@ -105,5 +139,6 @@ router.delete('/api/products/:product_id/delete', async(req,res)=>{
     }
   );
 })
+
 
 module.exports = router;
