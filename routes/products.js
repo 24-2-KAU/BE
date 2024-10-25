@@ -10,14 +10,14 @@ const connection  = require('../database/connect/mysql');
 // 상품 등록 api
 // 상품을 올리는 광고주의 id를 가져와서 넣기
 router.post('/api/products',async(req, res) => {
-  const{product_name,product_price, budget, product_pic, viewer_age, viewer_gender, platform, hastag  } = req.body;
+  const{product_name,product_price, budget, product_pic, viewer_age, viewer_gender, platform, hastag,ad_id  } = req.body;
   const product_id = Math.floor(Math.random() * 1000); // Generates a random number between 0 and 999,999,999
   console.log('Generated product_id:', product_id);
   console.log('Received product request:', req.body); // 요청 로그 출력
   const processedProductPic = product_pic && Object.keys(product_pic).length > 0 ? product_pic : null;
   // 데이터 베이스 저장
-  connection.query('INSERT INTO  mydb.products (product_id, product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag,ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)',
-    [product_id, product_name, product_price, budget, processedProductPic, viewer_age, viewer_gender, platform, hastag],
+  connection.query('INSERT INTO  mydb.products (product_id, product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)',
+    [product_id, product_name, product_price, budget, processedProductPic, viewer_age, viewer_gender, platform, hastag,  ad_id],
     (err,result) => {
       if(err){
         console.error('상품등록 실패: ',err);
