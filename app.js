@@ -1,6 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+
 const app = express();
 const port = 3000;
 const cors = require('cors');  // CORS 모듈 로드
@@ -23,15 +25,17 @@ app.use(session({
   cookie: { secure: false }  // HTTPS 환경에서는 true로 설정
 }));
 
-app.use(express.json());
+// 요청 크기 제한 설정
+app.use(express.json({ limit: '1000mb' }));  // JSON 본문 크기 제한 설정
+app.use(express.urlencoded({ extended: true, limit: '1000mb' })); // URL 인코딩된 데이터의 크기 제한 설정
 
 // 라우터 불러오기
 const userRoutes = require('./routes/userAdvertiser');
 const oauthRoutes = require('./routes/ouath');
 const productRoutes = require('./routes/products');
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '10mb' }));  // body-parser JSON 크기 제한 설정
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' })); // URL 인코딩된 데이터의 크기 제한 설정
 
 // 라우터 사용
 app.use(userRoutes);
@@ -42,4 +46,3 @@ app.use(productRoutes);
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
-
