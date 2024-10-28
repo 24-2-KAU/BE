@@ -7,20 +7,14 @@ const cors = require('cors');  // CORS 모듈 로드
 const session = require('express-session'); // express-session 추가
 // 데이터베이스 연결
 const connection  = require('./database/connect/mysql');
-<<<<<<< HEAD
-//const authenticateToken = require('./middleware/autenticationToken'); // 미들웨어 가져오기
+// const authenticateToken = require('./middleware/autenticationToken'); // 미들웨어 가져오기
 
 const corsOptions = {
   origin: 'http://127.0.0.1:5500', // 프론트엔드 도메인
   optionsSuccessStatus: 200,
   credentials: true 
 };
-=======
-const corsOptions = {
-  origin: 'http://127.0.0.1:5500', // 프론트엔드 도메인
-  optionsSuccessStatus: 200
-}
->>>>>>> origin/gpyo0111
+
 app.use(cors(corsOptions));
 
 app.use(session({
@@ -29,42 +23,25 @@ app.use(session({
   saveUninitialized: true,   // 초기화되지 않은 세션을 저장할지 여부
   cookie: { secure: false }  // HTTPS 환경에서는 true로 설정
 }));
-<<<<<<< HEAD
 
 // 요청 크기 제한 설정
 app.use(express.json({ limit: '1000mb' }));  // JSON 본문 크기 제한 설정
 app.use(express.urlencoded({ extended: true, limit: '1000mb' })); // URL 인코딩된 데이터의 크기 제한 설정
-=======
-app.use(express.json());
->>>>>>> origin/gpyo0111
 
 // 라우터 불러오기
 const userRoutes = require('./routes/userAdvertiser');
 const oauthRoutes = require('./routes/ouath');
-<<<<<<< HEAD
 const productRoutes = require('./routes/products');
 
 app.use(bodyParser.json({ limit: '10mb' }));  // body-parser JSON 크기 제한 설정
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' })); // URL 인코딩된 데이터의 크기 제한 설정
-=======
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
->>>>>>> origin/gpyo0111
 
 // 라우터 사용
 app.use(userRoutes);
 app.use(oauthRoutes);
-<<<<<<< HEAD
 app.use(productRoutes);
-=======
->>>>>>> origin/gpyo0111
 
 // 서버 실행
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/gpyo0111
