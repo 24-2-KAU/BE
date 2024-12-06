@@ -155,6 +155,34 @@ router.get('/signup', (req, res) => {
     res.redirect(authUrl);
 });
 
+// 액세스 토큰 갱신 함수
+const scheduleTokenRefresh = (email, refreshToken, expiresIn) => {
+    // 갱신 주기: 액세스 토큰 만료 1분 전에 갱신 (1000ms = 1초)
+    const refreshInterval = (expiresIn - 60) * 1000;
+
+    setInterval(async () => {
+        try {
+            // 1. 리프레시 토큰으로 새 액세스 토큰 요청
+            const tokenResponse = await axios.post(GOOGLE_TOKEN_URL, {
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                refresh_token: refreshToken,
+                grant_type: 'refresh_token',
+            });
+            const { access_token } = tokenResponse.data;
+
+            // 2. DB에 새 액세스 토큰 저장
+            await connection.promise().query(
+                'UPDATE mydb.user_influencer SET access_token = ? WHERE email = ?',
+                [access_token, email]
+            );
+            await connection.promise().query('COMMIT');
+            console.log(`액세스 토큰 갱신 성공: ${email}`);
+        } catch (error) {
+            console.error(`액세스 토큰 갱신 실패: ${email}, ${error.message}`);
+        }
+    }, refreshInterval);
+};
 
 // 로그인 리디렉션 처리
 router.get('/login/redirect', async (req, res) => {
@@ -189,16 +217,12 @@ router.get('/login/redirect', async (req, res) => {
 
             if (results.length > 0) {
                 console.log('로그인 성공:', email);
-                res.send(`
-                    <script>
-                        alert('Login completed');
-                        localStorage.setItem('email', '${email}');
-                        window.location.href = '/influencer_home.html'; 
-                    </script>
-                `);
+
+                // 이메일을 URL 파라미터로 전달하여 리디렉션
+                return res.redirect(`https://ad-influencer.com/influencer_home.html?email=${encodeURIComponent(email)}`);
             } else {
                 console.log('회원 정보가 없습니다:', email);
-                res.send('<h1>회원 정보가 없습니다. 회원가입을 진행해주세요.</h1>');
+                return res.send('<h1>회원 정보가 없습니다. 회원가입을 진행해주세요.</h1>');
             }
         });
     } catch (error) {
@@ -206,7 +230,8 @@ router.get('/login/redirect', async (req, res) => {
     }
 });
 
-// 회원가입 리디렉션 처리
+
+// 회원가입 리다이렉션
 router.get('/signup/redirect', async (req, res) => {
     const code = req.query.code;
 
@@ -219,12 +244,12 @@ router.get('/signup/redirect', async (req, res) => {
             redirect_uri: GOOGLE_SIGNUP_REDIRECT_URI,
             grant_type: 'authorization_code',
         });
-        const accessToken = tokenResponse.data.access_token;
+        const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
         // 2. 사용자 정보 가져오기
         const userInfoResponse = await axios.get(GOOGLE_USERINFO_URL, {
             headers: {
-                Authorization: `Bearer ${accessToken}`,
+                Authorization: `Bearer ${access_token}`,
             },
         });
         const { email, name } = userInfoResponse.data;
@@ -245,10 +270,18 @@ router.get('/signup/redirect', async (req, res) => {
 
         // 4. 새 사용자 등록
         await connection.promise().query(
-            'INSERT INTO mydb.user_influencer (influencer_id, email, name) VALUES (?, ?, ?)',
-            [email, email, name]
+            'INSERT INTO mydb.user_influencer (influencer_id, email, name, access_token, refresh_token) VALUES (?, ?, ?, ?, ?)',
+            [email, email, name, access_token, refresh_token]
         );
         console.log('새 사용자 등록 성공:', email);
+
+        // 5. 액세스 토큰 갱신 스케줄러 시작
+        scheduleTokenRefresh(email, refresh_token, expires_in);
+
+        res.send(`
+            <h1>회원가입 성공!</h1>
+            <a href="/">처음 화면으로 이동</a>
+        `);
 
         // 5. 채널 정보 가져오기
         const youtubeChannelResponse = await axios.get(YOUTUBE_CHANNEL_INFO_URL, {
@@ -257,7 +290,7 @@ router.get('/signup/redirect', async (req, res) => {
                 mine: 'true',
             },
             headers: {
-                Authorization: `Bearer ${accessToken}`,
+                Authorization: `Bearer ${access_token}`,
             },
         });
         const channelInfo = youtubeChannelResponse.data.items[0];
@@ -318,7 +351,7 @@ router.get('/signup/redirect', async (req, res) => {
                         order,
                         maxResults: 5,
                     },
-                    headers: { Authorization: `Bearer ${accessToken}` },
+                    headers: { Authorization: `Bearer ${access_token}` },
                 }
             );
 
@@ -334,7 +367,7 @@ router.get('/signup/redirect', async (req, res) => {
                         part: 'snippet,statistics,topicDetails,contentDetails',
                         id: videoIds,
                     },
-                    headers: { Authorization: `Bearer ${accessToken}` },
+                    headers: { Authorization: `Bearer ${access_token}` },
                 }
             );
 

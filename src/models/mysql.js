@@ -8,6 +8,10 @@ const connection = mysql.createConnection({
   port : 3306,  // 사용할 데이터베이스 이름
 });
 
+connection.query('SET autocommit = 1', (err) => {
+  if (err) throw err;
+  console.log('Autocommit is enabled');
+});
 
 connection.connect((err) => {
   if (err) {
