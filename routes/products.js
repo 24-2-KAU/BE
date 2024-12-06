@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'secret_key'; // JWT 서명에 사용되는 비밀 키// JWT 인증 미들웨어
+const axios = require('axios')
+
 
 // 데이터베이스 연결 파일
 const connection = require('../src/models/mysql');
