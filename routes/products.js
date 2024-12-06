@@ -4,14 +4,14 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'secret_key'; // JWT 서명에 사용되는 비밀 키// JWT 인증 미들웨어
 const axios = require('axios')
 
-
 // 데이터베이스 연결 파일
 const connection = require('../src/models/mysql');
 
 // 상품 등록 API
 router.post('/api/products', async (req, res) => {
   const { product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id } = req.body;
-  const product_id = Math.floor(Math.random() * 1000); // 랜덤 상품 ID 생성
+  const date = Date.now();
+  const product_id = `${date}${Math.floor(Math.random() * 1000)}`; // 랜덤 상품 ID 생성
 
   console.log('Generated product_id:', product_id);
   console.log('Received product request:', req.body); // 요청 로그
@@ -34,16 +34,20 @@ router.post('/api/products', async (req, res) => {
       console.log('상품 등록 성공:', product_name);
     }
   );
-  
+
   const aiJson = {
     productName: product_name,
     productDescription: product_description,
     hashtags: hashtag
   }
+
   const axiosRes = await axios.post(`https://adinfluencerai.click/product_embedding/${product_id}`,aiJson)
 
   if (axiosRes.status === 201) {
     console.log('AI 서버 응답: 201 Created');
+    return res.status(200).json({
+      message: "상품 업로드가 완료되었습니다, (DB저장, Embedding_DB저장까지 완료)"
+    })
   } else {
     console.log('AI 서버 응답 상태 코드:', axiosRes.status);
     return res.status(401).json({
