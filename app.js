@@ -18,7 +18,7 @@ const connection = require('./src/models/mysql');
 // CORS 설정
 const corsOptions = {
   origin: ['http://localhost:4000', 'https://ad-influencer.com', 'http://127.0.0.1:5500', 'http://localhost:3000'],
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -43,10 +43,13 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: ['http://localhost:4000', 'https://ad-influencer.com','http://127.0.0.1:5500', 'http://localhost:3000'], // 필요한 도메인 추가
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   }
 });
+
+// 프리플라이트 OPTIONS 요청 허용
+app.options('*', cors(corsOptions));
 
 // Socket.IO 핸들러 연결
 const socketHandler = require('./src/socket/socketHandler');

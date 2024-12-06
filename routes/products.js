@@ -8,21 +8,20 @@ const axios = require('axios')
 const connection = require('../src/models/mysql');
 
 // 상품 등록 API
+const { v4: uuidv4 } = require('uuid');
+
+// 상품 등록 API
 router.post('/api/products', async (req, res) => {
   const { product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id } = req.body;
-  const date = Date.now();
-  const product_id = `${date}${Math.floor(Math.random() * 1000)}`; // 랜덤 상품 ID 생성
+  const product_id = uuidv4(); // 고유한 UUID 생성
 
   console.log('Generated product_id:', product_id);
-  console.log('Received product request:', req.body); // 요청 로그
+  console.log('Received product request:', req.body);
 
-  // 이미지 처리 (Base64 헤더 제거 후 저장)
   const processedProductPic = product_pic && product_pic.includes('base64')
     ? product_pic.split(',')[1] // Base64 데이터만 추출
     : null;
 
-
-  // 데이터베이스에 저장
   connection.query(
     'INSERT INTO mydb.products (product_id, product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [product_id, product_name, product_price, product_description, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag, ad_id],
@@ -39,20 +38,27 @@ router.post('/api/products', async (req, res) => {
     productName: product_name,
     productDescription: product_description,
     hashtags: hashtag
-  }
+  };
 
-  const axiosRes = await axios.post(`https://adinfluencerai.click/product_embedding/${product_id}`,aiJson)
+  try {
+    const axiosRes = await axios.post(`https://adinfluencerai.click/product_embedding/${product_id}`, aiJson);
 
-  if (axiosRes.status === 201) {
-    console.log('AI 서버 응답: 201 Created');
-    return res.status(200).json({
-      message: "상품 업로드가 완료되었습니다, (DB저장, Embedding_DB저장까지 완료)"
-    })
-  } else {
-    console.log('AI 서버 응답 상태 코드:', axiosRes.status);
-    return res.status(401).json({
-      message: "상품 임베딩 중 오류가 발생했습니다."
-    })
+    if (axiosRes.status === 201) {
+      console.log('AI 서버 응답: 201 Created');
+      return res.status(200).json({
+        message: "상품 업로드가 완료되었습니다, (DB저장, Embedding_DB저장까지 완료)"
+      });
+    } else {
+      console.log('AI 서버 응답 상태 코드:', axiosRes.status);
+      return res.status(401).json({
+        message: "상품 임베딩 중 오류가 발생했습니다."
+      });
+    }
+  } catch (error) {
+    console.error('AI 서버 요청 오류:', error);
+    return res.status(500).json({
+      message: '상품 등록 또는 AI 서버 처리 중 오류가 발생했습니다.'
+    });
   }
 });
 
