@@ -19,9 +19,10 @@ router.post('/api/products', async (req, res) => {
     ? product_pic.split(',')[1] // Base64 데이터만 추출
     : null;
 
+
   // 데이터베이스에 저장
   connection.query(
-    'INSERT INTO mydb.products (product_id, product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO mydb.products (product_id, product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [product_id, product_name, product_price, product_description, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag, ad_id],
     (err, result) => {
       if (err) {
