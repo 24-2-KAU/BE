@@ -58,9 +58,11 @@ module.exports = (io, socket) => {
     });
 
     function notifyServer(notificationData) {
-        axios.post('http://localhost:4000/notify', notificationData)
-            .then(response => console.log('Notification sent successfully:', response.data))
-            .catch(error => console.error('Notification sending failed:', error));
+        axios.post('http://localhost:4000/notify', notificationData, {
+        headers: { 'Content-Type': 'application/json' },
+        })
+        .then(response => console.log('Notification sent successfully:', response.data))
+        .catch(error => console.error('Notification sending failed:', error));
     }
 };
 
