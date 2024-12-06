@@ -16,5 +16,5 @@ connection.connect((err) => {
   }
   console.log('MySQL에 성공적으로 연결되었습니다.');
 });
-
+//주석
 module.exports = connection;
