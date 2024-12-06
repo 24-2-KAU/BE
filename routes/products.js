@@ -30,9 +30,24 @@ router.post('/api/products', async (req, res) => {
         return res.status(500).json({ message: '상품 등록에 실패했습니다.' });
       }
       console.log('상품 등록 성공:', product_name);
-      return res.status(201).json({ message: '상품 등록 성공' });
     }
   );
+  
+  const aiJson = {
+    productName: product_name,
+    productDescription: product_description,
+    hashtags: hashtag
+  }
+  const axiosRes = await axios.post(`https://adinfluencerai.click/product_embedding/${product_id}`,aiJson)
+
+  if (axiosRes.status === 201) {
+    console.log('AI 서버 응답: 201 Created');
+  } else {
+    console.log('AI 서버 응답 상태 코드:', axiosRes.status);
+    return res.status(401).json({
+      message: "상품 임베딩 중 오류가 발생했습니다."
+    })
+  }
 });
 
 // 광고주 ID로 필터링하여 상품 목록 조회
