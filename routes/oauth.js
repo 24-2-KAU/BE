@@ -222,14 +222,19 @@ router.get('/login/redirect', async (req, res) => {
                 return res.redirect(`https://ad-influencer.com/influencer_home.html?email=${encodeURIComponent(email)}`);
             } else {
                 console.log('회원 정보가 없습니다:', email);
-                return res.send('<h1>회원 정보가 없습니다. 회원가입을 진행해주세요.</h1>');
+                return res.send(`
+                    <h1>회원 정보가 없습니다. 회원가입을 진행해주세요.</h1>
+                    <a href="https://ad-influencer.com/influencer_login.html">
+                        <button>처음 화면으로 이동</button>
+                    </a>
+                `);
             }
+            
         });
     } catch (error) {
         handleError(res, '로그인 실패', error);
     }
 });
-
 
 // 회원가입 리다이렉션
 router.get('/signup/redirect', async (req, res) => {
@@ -264,7 +269,9 @@ router.get('/signup/redirect', async (req, res) => {
             console.log('이미 회원가입된 사용자:', email);
             return res.send(`
                 <h1>이미 회원가입이 되었습니다.</h1>
-                <a href="/">처음 화면으로 이동</a>
+                <a href="https://ad-influencer.com/influencer_login.html">
+                    <button>처음 화면으로 이동</button>
+                </a>
             `);
         }
 
