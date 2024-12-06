@@ -8,7 +8,7 @@ const connection = require('../src/models/mysql');
 
 // 상품 등록 API
 router.post('/api/products', async (req, res) => {
-  const { product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id } = req.body;
+  const { product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id } = req.body;
   const product_id = Math.floor(Math.random() * 1000); // 랜덤 상품 ID 생성
 
   console.log('Generated product_id:', product_id);
@@ -21,8 +21,8 @@ router.post('/api/products', async (req, res) => {
 
   // 데이터베이스에 저장
   connection.query(
-    'INSERT INTO mydb.products (product_id, product_name, product_price, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [product_id, product_name, product_price, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag, ad_id],
+    'INSERT INTO mydb.products (product_id, product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [product_id, product_name, product_price, product_description, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag, ad_id],
     (err, result) => {
       if (err) {
         console.error('상품 등록 실패:', err);
@@ -96,7 +96,7 @@ router.get('/api/products/random', async (req, res) => {
 // 상품 수정 API
 router.put('/api/products/:product_id/edit', async (req, res) => {
   const product_id = req.params.product_id;
-  const { product_name, product_price, budget, viewer_age, viewer_gender, platform, hashtag, product_pic } = req.body;
+  const { product_name, product_price, product_description, budget, viewer_age, viewer_gender, platform, hashtag, product_pic } = req.body;
 
   console.log('product_id:', product_id);
   console.log('Received update request:', req.body); // 요청 로그
@@ -106,8 +106,8 @@ router.put('/api/products/:product_id/edit', async (req, res) => {
     : null;
 
   connection.query(
-    'UPDATE mydb.products SET product_name = ?, product_price = ?, budget = ?, product_pic = ?, viewer_age = ?, viewer_gender = ?, platform = ?, hashtag = ? WHERE product_id = ?',
-    [product_name, product_price, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag, product_id],
+    'UPDATE mydb.products SET product_name = ?, product_price = ?, product_description = ?, budget = ?, product_pic = ?, viewer_age = ?, viewer_gender = ?, platform = ?, hashtag = ? WHERE product_id = ?',
+    [product_name, product_price, product_description, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag, product_id],
     (err, result) => {
       if (err) {
         console.error('상품 업데이트 실패:', err);

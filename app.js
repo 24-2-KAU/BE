@@ -6,6 +6,12 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 const port = 3000;
+
+console.log('API 키 확인:', process.env.YOUTUBE_API_KEY); // 키가 출력되는지 확인
+
+// 데이터베이스 연결
+const connection = require('./src/models/mysql');
+
 // HTTP 서버 생성
 const http = require("http");
 const { Server } = require('socket.io');
@@ -51,7 +57,7 @@ io.on('connection', (socket) => {
 });
 // 라우터 불러오기
 const userRoutes = require('./routes/userAdvertiser');
-const oauthRoutes = require('./routes/ouath');
+const oauthRoutes = require('./routes/oauth');
 const productRoutes = require('./routes/products');
 // const chatRoutes = require('./routes/chat');
 const chatRoutes = require('./routes/chatRoute');
@@ -62,9 +68,9 @@ const chatHandler = require('./src/socket/socketHandler');
 
 // 라우터 사용
 app.use(userRoutes);
-app.use(oauthRoutes);
+app.use('/', oauthRoutes);
 app.use(productRoutes); // '/oauth' 접두사로 분리
-app.use(chatRoutes);   // '/chat' 접두사로 분리
+app.use('/', chatRoutes);   // '/chat' 접두사로 분리
 app.use(influencerList);
 
 
