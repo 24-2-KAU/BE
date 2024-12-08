@@ -18,9 +18,7 @@ router.post('/api/products', async (req, res) => {
   console.log('Generated product_id:', product_id);
   console.log('Received product request:', req.body);
 
-  const processedProductPic = product_pic && product_pic.includes('base64')
-    ? product_pic.split(',')[1] // Base64 데이터만 추출
-    : null;
+  const processedProductPic = product_pic? product_pic : null;
 
   connection.query(
     'INSERT INTO mydb.products (product_id, product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, ad_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -81,8 +79,7 @@ router.get('/api/products/check', async (req, res) => {
     }
 
     const products = results.map(product => {
-      const base64Image = product.product_pic ? `data:image/png;base64,${product.product_pic}` : null;
-      return { ...product, product_pic: base64Image };
+      return { ...product };
     });
 
     console.log('Retrieved products with base64 images:', products); // 디버깅 로그
@@ -108,8 +105,7 @@ router.get('/api/products/random', async (req, res) => {
 
     // 랜덤 순서로 상품 정렬
     const randomizedProducts = results.sort(() => Math.random() - 0.5).map(product => {
-      const base64Image = product.product_pic ? `data:image/png;base64,${product.product_pic}` : null;
-      return { ...product, product_pic: base64Image };
+      return { ...product};
     });
 
     console.log('랜덤 순서로 조회된 상품:', randomizedProducts);
@@ -129,13 +125,15 @@ router.put('/api/products/:product_id/edit', async (req, res) => {
   console.log('product_id:', product_id);
   console.log('Received update request:', req.body); // 요청 로그
 
+  /*
   const processedProductPic = product_pic && product_pic.includes('base64')
     ? product_pic.split(',')[1] // Base64 데이터만 추출
     : null;
+  */
 
   connection.query(
     'UPDATE mydb.products SET product_name = ?, product_price = ?, product_description = ?, budget = ?, product_pic = ?, viewer_age = ?, viewer_gender = ?, platform = ?, hashtag = ? WHERE product_id = ?',
-    [product_name, product_price, product_description, budget, processedProductPic, viewer_age, viewer_gender, platform, hashtag, product_id],
+    [product_name, product_price, product_description, budget, product_pic, viewer_age, viewer_gender, platform, hashtag, product_id],
     (err, result) => {
       if (err) {
         console.error('상품 업데이트 실패:', err);
@@ -167,11 +165,9 @@ router.get('/api/products/:product_id', (req, res) => {
       }
 
       const product = results[0];
-      const base64Image = product.product_pic ? `data:image/png;base64,${product.product_pic}` : null;
-
+      
       return res.status(200).json({
-          ...product,
-          product_pic: base64Image,
+          ...product
       });
   });
 });
