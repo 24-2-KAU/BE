@@ -60,6 +60,14 @@ module.exports = (io, socket) => {
         if (participantCount < 2) {
             notifyServer({ senderId, receiverId });
         }
+
+        if (participantCount === 2) {
+            // 인원이 2명일 경우 자동으로 읽음 상태 업데이트
+            await messageModel.updateReadStatus(chatRoomId, receiverId);
+
+            // 읽음 상태 업데이트 브로드캐스트
+            io.to(chatRoomId).emit('updateReadStatus', { chatRoomId, receiverId });
+        }
     });
 
     socket.on('messageRead', async ({ chatRoomId, receiverId }) => {
