@@ -14,10 +14,15 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV }}" >> .env
         
       - name: Make zip file
         run: |
           mkdir deploy
+          cp ./.env ./deploy/
           cp ./docker-compose.blue.yml ./deploy/
           cp ./docker-compose.green.yml ./deploy/
           cp ./appspec.yml ./deploy/
