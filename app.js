@@ -71,6 +71,11 @@ app.use(productRoutes);
 app.use('/', chatRoutes);
 app.use(influencerList);
 
+// health chec
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // 서버 실행
 server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
