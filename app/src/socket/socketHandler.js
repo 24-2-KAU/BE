@@ -95,7 +95,7 @@ module.exports = (io, socket) => {
 
 
     function notifyServer(notificationData) {
-        axios.post('172.31.8.27:4000/notify', notificationData, {
+        axios.post('http://172.31.8.27:4000/notify', notificationData, {
         headers: { 'Content-Type': 'application/json' },
         })
         .then(response => console.log('Notification sent successfully:', response.data))
