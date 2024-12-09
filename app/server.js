@@ -12,7 +12,7 @@ app.use(cors());
 
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'https://ad-influencer.com', 'http://127.0.0.1:5500'], // 허용 도메인 명시
+    origin: ['http://localhost:8081', 'http://localhost:8082', 'https://ad-influencer.com', 'http://127.0.0.1:5500'], // 허용 도메인 명시
     methods: ['GET', 'POST'],
     credentials: true,
   },
