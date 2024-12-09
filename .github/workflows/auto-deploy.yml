@@ -23,7 +23,7 @@ jobs:
           cp ./appspec.yml ./deploy/
           cp ./Dockerfile ./deploy/
           cp ./scripts/*.sh ./deploy/
-          cp ./app ./deploy/
+          cp -r ./app ./deploy/
           zip -r -qq -j ./nodejs-build.zip ./deploy
           
       - name: Configure AWS Credentials
