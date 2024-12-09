@@ -1,0 +1,45 @@
+name: Automated Deployment
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Make zip file
+        run: |
+          mkdir deploy
+          cp ./docker-compose.blue.yml ./deploy/
+          cp ./docker-compose.green.yml ./deploy/
+          cp ./appspec.yml ./deploy/
+          cp ./Dockerfile ./deploy/
+          cp ./scripts/*.sh ./deploy/
+          cp ./app ./deploy/
+          zip -r -qq -j ./nodejs-build.zip ./deploy
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+        
+      - name: Upload to S3
+        run: |
+          aws s3 cp ./spring-build.zip \
+            s3://$S3_BUCKET_NAME
+      
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name ad-influencer-deploy
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name deploy-group
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=nodejs-build.zip
