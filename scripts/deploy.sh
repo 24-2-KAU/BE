@@ -10,12 +10,12 @@ if [ "$CURRENT_PORT" == "$BLUE_PORT" ]; then
   # 현재 Blue가 활성화 -> Green으로 전환
   TARGET_PORT=$GREEN_PORT
   echo "Switching to Green (Port: $TARGET_PORT)..."
-  docker-compose -f docker-compose.green.yml up -d --build
+  sudo docker-compose -f docker-compose.green.yml up -d --build
 else
   # 현재 Green이 활성화 -> Blue로 전환
   TARGET_PORT=$BLUE_PORT
   echo "Switching to Blue (Port: $TARGET_PORT)..."
-  docker-compose -f docker-compose.blue.yml up -d --build
+  sudo docker-compose -f docker-compose.blue.yml up -d --build
 fi
 
 sleep 30
@@ -28,13 +28,13 @@ sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port $TARG
 # 기존 컨테이너 종료
 if [ "$CURRENT_PORT" == "$BLUE_PORT" ]; then
   echo "Stopping Blue container..."
-  docker-compose -f docker-compose.blue.yml down
+  sudo docker-compose -f docker-compose.blue.yml down
 else
   echo "Stopping Green container..."
-  docker-compose -f docker-compose.green.yml down
+  sudo docker-compose -f docker-compose.green.yml down
 fi
 
-docker image prune -af
+sudo docker image prune -af
 
 echo "Deployment complete. Traffic redirected to $TARGET_PORT."
 
