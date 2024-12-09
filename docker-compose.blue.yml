@@ -1,0 +1,8 @@
+#blue
+version: '3'
+services:
+  node_ex-api:
+    build: .
+    ports:
+      - "8081:3000"
+    container_name: node_ex-blue
