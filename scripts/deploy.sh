@@ -4,7 +4,7 @@ BLUE_PORT=8081
 GREEN_PORT=8082
 CURRENT_PORT=$(sudo iptables -t nat -L PREROUTING -n -v | grep "REDIRECT" | grep "dpt:80" | awk '{print $NF}' | cut -d':' -f2)
 
-cd /home/ec2-user/app
+cd /home/ubuntu/app
 
 if [ "$CURRENT_PORT" == "$BLUE_PORT" ]; then
   # 현재 Blue가 활성화 -> Green으로 전환
